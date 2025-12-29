@@ -207,7 +207,18 @@
 </style>
 
 <script>
-    const events = {{{json events}}};
+    let eventsData = {{{json events}}};
+    // Defensive check: if events comes as a string (double encoded), parse it
+    if (typeof eventsData === 'string') {
+        try {
+            eventsData = JSON.parse(eventsData);
+        } catch (e) {
+            console.error('Failed to parse events JSON:', e);
+            eventsData = [];
+        }
+    }
+    const events = eventsData;
+
     const ctx = document.getElementById('responseTimeChart').getContext('2d');
     
     // Check if we have data
