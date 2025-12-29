@@ -29,6 +29,26 @@ serviceController.dashboard = async (req, res) => {
     }
 };
 
+serviceController.listPartial = async (req, res) => {
+    try {
+        const services = await prisma.service.findMany({
+            where: { userId: req.user.id },
+            orderBy: { id: 'desc' }
+        });
+
+        const enrichedServices = await Promise.all(services.map(async (service) => {
+            const status = await redisClient.get(`service:${service.id}:status`) || service.status;
+            const responseTime = await redisClient.get(`service:${service.id}:responseTime`);
+            return { ...service, status, responseTime };
+        }));
+
+        res.render('partials/service-list', { layout: false, services: enrichedServices });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error loading services');
+    }
+};
+
 serviceController.renderNew = (req, res) => {
     res.render('services/new');
 };

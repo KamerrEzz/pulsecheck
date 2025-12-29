@@ -11,6 +11,8 @@ const isAuthenticated = (req, res, next) => {
 
 router.use(isAuthenticated);
 
+router.get('/partials/list', serviceController.listPartial);
+
 router.get('/new', serviceController.renderNew);
 router.post('/new', serviceController.create);
 
