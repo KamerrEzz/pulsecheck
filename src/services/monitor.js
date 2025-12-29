@@ -85,4 +85,4 @@ const startMonitoring = () => {
     });
 };
 
-module.exports = startMonitoring;
+module.exports = { startMonitoring, checkService };

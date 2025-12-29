@@ -16,7 +16,7 @@ const serviceRoutes = require('./routes/service.routes');
 
 // Config
 require('./config/passport');
-const startMonitoring = require('./services/monitor');
+const { startMonitoring } = require('./services/monitor');
 
 const app = express();
 

@@ -20,6 +20,7 @@ router.get('/:id/edit', serviceController.renderEdit);
 router.post('/:id/edit', serviceController.update);
 
 router.post('/:id/delete', serviceController.delete);
+router.post('/:id/check', serviceController.checkNow);
 
 router.get('/:id', serviceController.show);
 

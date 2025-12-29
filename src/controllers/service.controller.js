@@ -1,5 +1,6 @@
 const prisma = require('../config/db');
 const { createClient } = require('redis');
+const { checkService } = require('../services/monitor');
 
 const redisClient = createClient({
     url: process.env.REDIS_URL
@@ -104,6 +105,32 @@ serviceController.update = async (req, res) => {
     }
 };
 
+serviceController.checkNow = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const service = await prisma.service.findFirst({
+            where: { id: parseInt(id), userId: req.user.id }
+        });
+
+        if (!service) return res.status(404).send();
+
+        // Perform immediate check
+        await checkService(service);
+
+        // Get updated status
+        const status = await redisClient.get(`service:${service.id}:status`) || service.status;
+        const responseTime = await redisClient.get(`service:${service.id}:responseTime`);
+        
+        const enrichedService = { ...service, status, responseTime };
+
+        // Render just the single service card
+        res.render('partials/single-service', { layout: false, service: enrichedService });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error checking service');
+    }
+};
+
 serviceController.delete = async (req, res) => {
     const { id } = req.params;
     try {
@@ -114,6 +141,11 @@ serviceController.delete = async (req, res) => {
         await redisClient.del(`service:${id}:status`);
         await redisClient.del(`service:${id}:responseTime`);
         
+        // Handle HTMX request
+        if (req.headers['hx-request']) {
+            return res.status(200).send('');
+        }
+
         res.redirect('/dashboard');
     } catch (error) {
         console.error(error);

@@ -661,10 +661,6 @@ video {
   display: inline-block;
 }
 
-.inline {
-  display: inline;
-}
-
 .flex {
   display: flex;
 }
@@ -764,6 +760,10 @@ video {
 
 .justify-between {
   justify-content: space-between;
+}
+
+.gap-1 {
+  gap: 0.25rem;
 }
 
 .gap-3 {
@@ -1159,6 +1159,11 @@ video {
 
 .duration-300 {
   transition-duration: 300ms;
+}
+
+.htmx-swapping {
+  opacity: 0;
+  transition: opacity 500ms ease-out;
 }
 
 .hover\:bg-blue-50:hover {
