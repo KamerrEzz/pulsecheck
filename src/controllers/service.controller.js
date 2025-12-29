@@ -32,8 +32,20 @@ serviceController.dashboard = async (req, res) => {
 
 serviceController.listPartial = async (req, res) => {
     try {
+        const { search } = req.query;
+        const where = {
+            userId: req.user.id
+        };
+
+        if (search) {
+            where.OR = [
+                { name: { contains: search, mode: 'insensitive' } },
+                { url: { contains: search, mode: 'insensitive' } }
+            ];
+        }
+
         const services = await prisma.service.findMany({
-            where: { userId: req.user.id },
+            where,
             orderBy: { id: 'desc' }
         });
 
