@@ -33,7 +33,12 @@ serviceController.dashboard = async (req, res) => {
 
 serviceController.listPartial = async (req, res) => {
     try {
-        const { search } = req.query;
+        let { search } = req.query;
+        // Handle case where search is an array (e.g. duplicate query params)
+        if (Array.isArray(search)) {
+            search = search[0];
+        }
+
         const where = {
             userId: req.user.id
         };
@@ -154,12 +159,23 @@ serviceController.checkNow = async (req, res) => {
 serviceController.delete = async (req, res) => {
     const { id } = req.params;
     try {
-        await prisma.service.deleteMany({
-            where: { id: parseInt(id), userId: req.user.id }
+        const serviceId = parseInt(id);
+        
+        // Delete related events first (Fix for foreign key constraint)
+        await prisma.event.deleteMany({
+            where: { serviceId: serviceId }
         });
-        // Also cleanup redis keys if needed
+
+        // Delete the service
+        await prisma.service.deleteMany({
+            where: { id: serviceId, userId: req.user.id }
+        });
+
+        // Also cleanup redis keys
         await redisClient.del(`service:${id}:status`);
         await redisClient.del(`service:${id}:responseTime`);
+        await redisClient.del(`service:${id}:history`);
+        await redisClient.del(`service:${id}:lastCheck`);
         
         // Handle HTMX request
         if (req.headers['hx-request']) {
@@ -169,6 +185,10 @@ serviceController.delete = async (req, res) => {
         res.redirect('/dashboard');
     } catch (error) {
         console.error(error);
+        // If HTMX request fails, don't redirect to dashboard (causes visual bug)
+        if (req.headers['hx-request']) {
+            return res.status(500).send('<div class="bg-red-100 text-red-700 p-2 rounded">Error deleting service</div>');
+        }
         res.redirect('/dashboard');
     }
 };
