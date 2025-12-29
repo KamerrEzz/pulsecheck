@@ -108,6 +108,7 @@ app.use((req, res, next) => {
 app.use('/', indexRoutes);
 app.use('/auth', authRoutes);
 app.use('/services', serviceRoutes);
+app.use('/status', statusRoutes);
 
 // Start Server
 const PORT = process.env.PORT || 3000;

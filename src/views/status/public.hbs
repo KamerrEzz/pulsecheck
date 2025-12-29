@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Status Page - {{user.email}}</title>
+    <link href="/css/output.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="max-w-4xl mx-auto px-4 py-8">
+        <header class="mb-8 text-center">
+            <h1 class="text-3xl font-bold text-gray-800">System Status</h1>
+            <p class="text-gray-600">Live updates for services monitored by User #{{user.id}}</p>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {{#each services}}
+            <div class="bg-white rounded-lg shadow-md overflow-hidden border-l-4 {{statusClass this.status 'border'}}">
+                <div class="p-6">
+                    <div class="flex justify-between items-start mb-4">
+                        <h3 class="text-xl font-bold text-gray-800">{{this.name}}</h3>
+                        <span class="px-2 py-1 text-xs font-semibold rounded {{statusClass this.status 'badge'}}">
+                            {{this.status}}
+                        </span>
+                    </div>
+                    
+                    <p class="text-gray-600 text-sm mb-2">{{this.url}}</p>
+                    
+                    {{#if this.responseTime}}
+                    <div class="flex items-center text-sm text-gray-500 mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                        {{this.responseTime}}ms
+                    </div>
+                    {{/if}}
+
+                    {{#if this.history}}
+                    <div class="flex gap-1 mb-0 h-4 items-end">
+                        {{#each this.history}}
+                            <div class="w-2 rounded-sm {{#if (eq this 'UP')}}bg-green-400 h-3{{else}}bg-red-400 h-4{{/if}}" title="{{this}}"></div>
+                        {{/each}}
+                    </div>
+                    {{/if}}
+                </div>
+            </div>
+            {{/each}}
+        </div>
+        
+        <footer class="mt-12 text-center text-gray-500 text-sm">
+            <p>Powered by PulseCheck</p>
+        </footer>
+    </div>
+</body>
+</html>
