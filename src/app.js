@@ -13,6 +13,7 @@ require('dotenv').config();
 const authRoutes = require('./routes/auth.routes');
 const indexRoutes = require('./routes/index.routes');
 const serviceRoutes = require('./routes/service.routes');
+const statusRoutes = require('./routes/status.routes');
 
 // Config
 require('./config/passport');
