@@ -188,17 +188,54 @@ serviceController.show = async (req, res) => {
             orderBy: { timestamp: 'asc' }
         });
 
+        // Calculate Stats
+        const totalChecks = events.length;
+        const upChecks = events.filter(e => e.statusCode >= 200 && e.statusCode < 400).length;
+        const uptime24h = totalChecks > 0 ? ((upChecks / totalChecks) * 100).toFixed(2) : 100;
+        
+        const totalResponseTime = events.reduce((acc, curr) => acc + curr.responseTime, 0);
+        const avgResponseTime24h = totalChecks > 0 ? Math.round(totalResponseTime / totalChecks) : 0;
+
         // Get live status from Redis
         const liveStatus = await redisClient.get(`service:${service.id}:status`) || service.status;
         const liveResponseTime = await redisClient.get(`service:${service.id}:responseTime`) || 0;
+        const lastCheck = await redisClient.get(`service:${service.id}:lastCheck`); // We need to store this in monitor.js
+
+        // Recent Logs (Reverse order for table)
+        const logs = [...events].reverse().slice(0, 50);
 
         res.render('services/show', { 
-            service: { ...service, status: liveStatus, responseTime: liveResponseTime }, 
-            events: JSON.stringify(events)
+            service: { 
+                ...service, 
+                status: liveStatus, 
+                responseTime: liveResponseTime,
+                lastCheck: lastCheck ? new Date(parseInt(lastCheck)) : null
+            }, 
+            stats: {
+                uptime24h,
+                avgResponseTime24h,
+                totalChecks
+            },
+            events: JSON.stringify(events), // For Chart
+            logs // For Table
         });
     } catch (error) {
         console.error(error);
         res.redirect('/dashboard');
+    }
+};
+
+serviceController.logsPartial = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const events = await prisma.event.findMany({
+            where: { serviceId: parseInt(id) },
+            orderBy: { timestamp: 'desc' },
+            take: 20
+        });
+        res.render('partials/service-logs', { layout: false, logs: events });
+    } catch (error) {
+        res.status(500).send('');
     }
 };
 

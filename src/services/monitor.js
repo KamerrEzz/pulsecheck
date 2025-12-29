@@ -42,6 +42,7 @@ const checkService = async (service) => {
     const ttl = service.checkInterval * 2; 
     await redisClient.set(`service:${service.id}:status`, status, { EX: ttl });
     await redisClient.set(`service:${service.id}:responseTime`, responseTime, { EX: ttl });
+    await redisClient.set(`service:${service.id}:lastCheck`, Date.now(), { EX: ttl });
 
     // Update History List (Keep last 20)
     await redisClient.lPush(`service:${service.id}:history`, status);

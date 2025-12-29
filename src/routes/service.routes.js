@@ -22,6 +22,7 @@ router.post('/:id/edit', serviceController.update);
 router.post('/:id/delete', serviceController.delete);
 router.post('/:id/check', serviceController.checkNow);
 
+router.get('/:id/logs', serviceController.logsPartial);
 router.get('/:id', serviceController.show);
 
 module.exports = router;

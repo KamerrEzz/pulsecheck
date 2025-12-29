@@ -1,39 +1,189 @@
-<div class="max-w-6xl mx-auto">
-    <div class="mb-6 flex justify-between items-center">
-        <div>
-            <h1 class="text-3xl font-bold text-gray-800">{{service.name}}</h1>
-            <a href="{{service.url}}" target="_blank" class="text-blue-600 hover:underline">{{service.url}}</a>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header Section -->
+    <div class="md:flex md:items-center md:justify-between mb-8">
+        <div class="flex-1 min-w-0">
+            <h2 class="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
+                {{service.name}}
+            </h2>
+            <div class="mt-1 flex flex-col sm:flex-row sm:flex-wrap sm:mt-0 sm:space-x-6">
+                <div class="mt-2 flex items-center text-sm text-gray-500">
+                    <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                    </svg>
+                    <a href="{{service.url}}" target="_blank" class="hover:underline">{{service.url}}</a>
+                </div>
+                <div class="mt-2 flex items-center text-sm text-gray-500">
+                    <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Check interval: {{service.checkInterval}}s
+                </div>
+            </div>
         </div>
-        <div class="text-right">
-            <span class="inline-block px-4 py-2 rounded-lg text-lg font-bold {{#if (eq service.status 'UP')}}bg-green-100 text-green-800{{else if (eq service.status 'DOWN')}}bg-red-100 text-red-800{{else}}bg-yellow-100 text-yellow-800{{/if}}">
-                {{service.status}}
-            </span>
-            <p class="text-gray-500 mt-1">Checked every {{service.checkInterval}}s</p>
+        <div class="mt-4 flex md:mt-0 md:ml-4 space-x-3">
+             <button 
+                hx-post="/services/{{service.id}}/check"
+                hx-target="#service-status-badge"
+                hx-swap="outerHTML"
+                class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                Check Now
+            </button>
+            <a href="/services/{{service.id}}/edit" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                Edit Service
+            </a>
         </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        <div class="bg-white p-6 rounded-lg shadow-md lg:col-span-2">
-            <h3 class="text-lg font-bold mb-4">Response Time (Last 24h)</h3>
-            <canvas id="responseTimeChart"></canvas>
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+        <!-- Status Card -->
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        {{#if (eq service.status 'UP')}}
+                            <div class="rounded-md bg-green-50 p-3">
+                                <svg class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                        {{else}}
+                            <div class="rounded-md bg-red-50 p-3">
+                                <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </div>
+                        {{/if}}
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Current Status</dt>
+                            <dd>
+                                <div class="text-lg font-medium text-gray-900" id="service-status-badge">
+                                    {{service.status}}
+                                </div>
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="bg-white p-6 rounded-lg shadow-md">
-            <h3 class="text-lg font-bold mb-4">Latest Stats</h3>
-            <div class="space-y-4">
-                <div class="flex justify-between border-b pb-2">
-                    <span class="text-gray-600">Current Response Time</span>
-                    <span class="font-bold">{{service.responseTime}} ms</span>
+
+        <!-- Uptime Card -->
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="rounded-md bg-blue-50 p-3">
+                            <svg class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">24h Uptime</dt>
+                            <dd>
+                                <div class="text-lg font-medium text-gray-900">{{stats.uptime24h}}%</div>
+                            </dd>
+                        </dl>
+                    </div>
                 </div>
-                <div class="flex justify-between border-b pb-2">
-                    <span class="text-gray-600">Last Check</span>
-                    <span class="font-bold">Just now</span> 
-                    <!-- We could pass last check time from redis if stored -->
+            </div>
+        </div>
+
+        <!-- Avg Response Card -->
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="rounded-md bg-purple-50 p-3">
+                            <svg class="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Avg Response</dt>
+                            <dd>
+                                <div class="text-lg font-medium text-gray-900">{{stats.avgResponseTime24h}} ms</div>
+                            </dd>
+                        </dl>
+                    </div>
                 </div>
-                 <div class="mt-6">
-                    <a href="/services/{{service.id}}/edit" class="block w-full text-center bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded mb-2">
-                        Edit Settings
-                    </a>
+            </div>
+        </div>
+
+        <!-- Last Check Card -->
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="rounded-md bg-yellow-50 p-3">
+                            <svg class="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Last Check</dt>
+                            <dd>
+                                <div class="text-lg font-medium text-gray-900">
+                                    {{#if service.lastCheck}}
+                                        {{formatDate service.lastCheck}}
+                                    {{else}}
+                                        Just now
+                                    {{/if}}
+                                </div>
+                            </dd>
+                        </dl>
+                    </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Chart Section (2 cols) -->
+        <div class="lg:col-span-2 bg-white rounded-lg shadow">
+            <div class="p-6 border-b border-gray-200">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">Response Time History (24h)</h3>
+            </div>
+            <div class="p-6">
+                <div class="relative h-80 w-full">
+                    <canvas id="responseTimeChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Logs Section (1 col) -->
+        <div class="bg-white rounded-lg shadow flex flex-col h-[500px]">
+            <div class="p-6 border-b border-gray-200 flex justify-between items-center">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">Recent Logs</h3>
+                <span class="relative flex h-3 w-3">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                </span>
+            </div>
+            <div class="flex-1 overflow-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50 sticky top-0">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">MS</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200" 
+                           hx-get="/services/{{service.id}}/logs" 
+                           hx-trigger="every 5s" 
+                           hx-swap="innerHTML">
+                        {{> service-logs logs=logs}}
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -41,14 +191,13 @@
 
 <script>
     const events = {{{json events}}};
-    
     const ctx = document.getElementById('responseTimeChart').getContext('2d');
     
     // Process data for Chart.js
     const labels = events.map(e => new Date(e.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}));
     const data = events.map(e => e.responseTime);
-    const backgroundColors = events.map(e => e.statusCode >= 400 ? 'rgba(239, 68, 68, 0.5)' : 'rgba(59, 130, 246, 0.5)');
     const borderColors = events.map(e => e.statusCode >= 400 ? 'rgb(239, 68, 68)' : 'rgb(59, 130, 246)');
+    const pointColors = events.map(e => e.statusCode >= 400 ? 'rgb(239, 68, 68)' : 'rgba(59, 130, 246, 0)'); // Only show red points prominently
 
     new Chart(ctx, {
         type: 'line',
@@ -58,21 +207,56 @@
                 label: 'Response Time (ms)',
                 data: data,
                 borderColor: 'rgb(59, 130, 246)',
-                backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                tension: 0.1,
+                backgroundColor: 'rgba(59, 130, 246, 0.05)',
+                borderWidth: 2,
+                tension: 0.3,
                 fill: true,
-                pointBackgroundColor: borderColors,
+                pointRadius: 2,
+                pointHoverRadius: 5,
+                pointBackgroundColor: pointColors,
                 pointBorderColor: borderColors
             }]
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                intersect: false,
+                mode: 'index',
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    padding: 12,
+                    titleFont: {
+                        size: 14
+                    },
+                    bodyFont: {
+                        size: 13
+                    }
+                }
+            },
             scales: {
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        maxTicksLimit: 8
+                    }
+                },
                 y: {
                     beginAtZero: true,
+                    grid: {
+                        borderDash: [2, 4],
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    },
                     title: {
                         display: true,
-                        text: 'ms'
+                        text: 'Milliseconds'
                     }
                 }
             }
