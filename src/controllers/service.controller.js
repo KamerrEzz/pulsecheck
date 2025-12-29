@@ -132,8 +132,9 @@ serviceController.checkNow = async (req, res) => {
         // Get updated status
         const status = await redisClient.get(`service:${service.id}:status`) || service.status;
         const responseTime = await redisClient.get(`service:${service.id}:responseTime`);
+        const history = await redisClient.lRange(`service:${service.id}:history`, 0, -1) || [];
         
-        const enrichedService = { ...service, status, responseTime };
+        const enrichedService = { ...service, status, responseTime, history };
 
         // Render just the single service card
         res.render('partials/single-service', { layout: false, service: enrichedService });

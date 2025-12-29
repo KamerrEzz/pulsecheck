@@ -43,6 +43,10 @@ const checkService = async (service) => {
     await redisClient.set(`service:${service.id}:status`, status, { EX: ttl });
     await redisClient.set(`service:${service.id}:responseTime`, responseTime, { EX: ttl });
 
+    // Update History List (Keep last 20)
+    await redisClient.lPush(`service:${service.id}:history`, status);
+    await redisClient.lTrim(`service:${service.id}:history`, 0, 19);
+
     // Log Event
     await prisma.event.create({
         data: {

@@ -25,6 +25,14 @@
         </div>
         {{/if}}
 
+        {{#if service.history}}
+        <div class="flex gap-1 mb-4 h-4 items-end">
+            {{#each service.history}}
+                <div class="w-2 rounded-sm {{#if (eq this 'UP')}}bg-green-400 h-3{{else}}bg-red-400 h-4{{/if}}" title="{{this}}"></div>
+            {{/each}}
+        </div>
+        {{/if}}
+
         <div class="flex justify-between items-center mt-4 border-t pt-4">
             <div class="flex space-x-2">
                 <a href="/services/{{service.id}}" class="text-blue-600 hover:text-blue-800 text-sm font-medium">Details</a>
