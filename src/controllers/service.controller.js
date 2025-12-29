@@ -216,7 +216,7 @@ serviceController.show = async (req, res) => {
                 avgResponseTime,
                 totalChecks
             },
-            events: JSON.stringify(events), // For Chart
+            events: events, // For Chart
             logs // For Table
         });
     } catch (error) {
