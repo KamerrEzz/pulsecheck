@@ -138,6 +138,11 @@ serviceController.checkNow = async (req, res) => {
         
         const enrichedService = { ...service, status, responseTime, history };
 
+        // Handle details view request
+        if (req.query.view === 'details') {
+            return res.render('partials/service-status-card', { layout: false, service: enrichedService });
+        }
+
         // Render just the single service card
         res.render('partials/single-service', { layout: false, service: enrichedService });
     } catch (error) {

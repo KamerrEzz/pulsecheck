@@ -1,0 +1,31 @@
+<div class="bg-white overflow-hidden shadow rounded-lg" id="status-card">
+    <div class="p-5">
+        <div class="flex items-center">
+            <div class="flex-shrink-0">
+                {{#if (eq service.status 'UP')}}
+                    <div class="rounded-md bg-green-50 p-3">
+                        <svg class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                    </div>
+                {{else}}
+                    <div class="rounded-md bg-red-50 p-3">
+                        <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </div>
+                {{/if}}
+            </div>
+            <div class="ml-5 w-0 flex-1">
+                <dl>
+                    <dt class="text-sm font-medium text-gray-500 truncate">Current Status</dt>
+                    <dd>
+                        <div class="text-lg font-medium text-gray-900" id="service-status-badge">
+                            {{service.status}}
+                        </div>
+                    </dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
