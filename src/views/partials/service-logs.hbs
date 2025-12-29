@@ -1,18 +1,15 @@
 {{#each logs}}
-<tr class="hover:bg-gray-50 transition-colors">
-    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-        {{formatDate this.timestamp}}
+<tr class="hover:bg-gray-50 transition-colors border-b last:border-0">
+    <td class="px-4 py-2 whitespace-nowrap text-xs text-gray-500">
+        {{formatTime this.timestamp}}
     </td>
-    <td class="px-6 py-4 whitespace-nowrap">
-        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{#if (eq this.statusCode 200)}}bg-green-100 text-green-800{{else}}bg-red-100 text-red-800{{/if}}">
+    <td class="px-4 py-2 whitespace-nowrap">
+        <span class="px-2 py-0.5 inline-flex text-xs leading-4 font-semibold rounded-full {{#if (gte this.statusCode 400)}}bg-red-100 text-red-800{{else}}bg-green-100 text-green-800{{/if}}">
             {{this.statusCode}}
         </span>
     </td>
-    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-        {{this.responseTime}} ms
-    </td>
-    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-        {{this.message}}
+    <td class="px-4 py-2 whitespace-nowrap text-xs text-gray-500 font-mono">
+        {{this.responseTime}}ms
     </td>
 </tr>
 {{/each}}

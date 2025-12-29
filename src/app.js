@@ -38,11 +38,16 @@ app.engine('.hbs', engine({
     partialsDir: path.join(app.get('views'), 'partials'),
     extname: '.hbs',
     helpers: {
-        json: (context) => JSON.stringify(context),
-        eq: (a, b) => a === b,
-        formatDate: (date) => {
+            json: (context) => JSON.stringify(context),
+            eq: (a, b) => a === b,
+            gte: (a, b) => a >= b,
+            formatDate: (date) => {
             if (!date) return 'Never';
             return new Date(date).toLocaleString();
+        },
+        formatTime: (date) => {
+            if (!date) return '';
+            return new Date(date).toLocaleTimeString();
         },
         statusClass: (status, type) => {
             const colors = {
