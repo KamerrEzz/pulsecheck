@@ -52,7 +52,8 @@ serviceController.listPartial = async (req, res) => {
         const enrichedServices = await Promise.all(services.map(async (service) => {
             const status = await redisClient.get(`service:${service.id}:status`) || service.status;
             const responseTime = await redisClient.get(`service:${service.id}:responseTime`);
-            return { ...service, status, responseTime };
+            const history = await redisClient.lRange(`service:${service.id}:history`, 0, -1) || [];
+            return { ...service, status, responseTime, history };
         }));
 
         res.render('partials/service-list', { layout: false, services: enrichedServices });
