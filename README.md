@@ -1,5 +1,7 @@
 # PulseCheck
 
+![PulseCheck Dashboard Mockup](wallpaper.png)
+
 Un monitor de estado de servicios auto-hospedado, simple y eficiente. Construido con Node.js, HTMX y Redis.
 
 ## Stack Tecnológico
