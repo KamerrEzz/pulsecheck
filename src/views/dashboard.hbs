@@ -1,0 +1,62 @@
+<div class="max-w-4xl mx-auto">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-gray-800">Dashboard</h1>
+        <a href="/services/new" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Add Service</a>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {{#each services}}
+            <div class="bg-white rounded-lg shadow-md overflow-hidden border-l-4 {{statusClass status 'border'}}">
+                <div class="p-6">
+                    <div class="flex justify-between items-start mb-4">
+                        <h3 class="text-xl font-bold text-gray-800 truncate" title="{{name}}">{{name}}</h3>
+                        <span class="px-2 py-1 text-xs font-semibold rounded {{statusClass status 'badge'}}">
+                            {{status}}
+                        </span>
+                    </div>
+                    
+                    <p class="text-gray-600 text-sm mb-2 truncate" title="{{url}}">{{url}}</p>
+                    
+                    <div class="flex items-center text-sm text-gray-500 mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        {{checkInterval}}s interval
+                    </div>
+
+                    {{#if responseTime}}
+                    <div class="flex items-center text-sm text-gray-500 mb-4">
+                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                        {{responseTime}}ms
+                    </div>
+                    {{/if}}
+
+                    <div class="flex justify-between items-center mt-4 border-t pt-4">
+                        <a href="/services/{{id}}" class="text-blue-600 hover:text-blue-800 text-sm font-medium">Details</a>
+                        <div class="flex space-x-2">
+                            <a href="/services/{{id}}/edit" class="text-gray-500 hover:text-gray-700">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                            </a>
+                            <form action="/services/{{id}}/delete" method="POST" onsubmit="return confirm('Are you sure?');" class="inline">
+                                <button type="submit" class="text-red-500 hover:text-red-700">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {{else}}
+            <div class="col-span-full text-center py-12">
+                <p class="text-gray-500 text-lg mb-4">You haven't added any services yet.</p>
+                <a href="/services/new" class="bg-blue-600 text-white px-6 py-3 rounded hover:bg-blue-700">Add Your First Service</a>
+            </div>
+        {{/each}}
+    </div>
+</div>

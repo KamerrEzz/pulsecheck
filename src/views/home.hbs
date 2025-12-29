@@ -1,0 +1,13 @@
+<div class="text-center mt-20">
+    <h1 class="text-5xl font-bold text-gray-800 mb-6">Welcome to PulseCheck</h1>
+    <p class="text-xl text-gray-600 mb-8">Simple, reliable, and fast uptime monitoring for your services.</p>
+    
+    {{#if user}}
+        <a href="/dashboard" class="bg-blue-600 text-white px-8 py-3 rounded-lg text-lg hover:bg-blue-700 shadow-lg">Go to Dashboard</a>
+    {{else}}
+        <div class="space-x-4">
+            <a href="/auth/register" class="bg-blue-600 text-white px-8 py-3 rounded-lg text-lg hover:bg-blue-700 shadow-lg">Get Started</a>
+            <a href="/auth/login" class="bg-white text-blue-600 border border-blue-600 px-8 py-3 rounded-lg text-lg hover:bg-blue-50 shadow-lg">Login</a>
+        </div>
+    {{/if}}
+</div>

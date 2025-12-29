@@ -1,0 +1,38 @@
+generator client {
+  provider = "prisma-client-js"
+  engineType = "library"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  services  Service[]
+}
+
+model Service {
+  id            Int      @id @default(autoincrement())
+  name          String
+  url           String
+  checkInterval Int      @default(60) // seconds
+  status        String   @default("PENDING") // UP, DOWN, PENDING
+  userId        Int
+  user          User     @relation(fields: [userId], references: [id])
+  events        Event[]
+}
+
+model Event {
+  id           Int      @id @default(autoincrement())
+  statusCode   Int
+  responseTime Int      // ms
+  message      String?
+  timestamp    DateTime @default(now())
+  serviceId    Int
+  service      Service  @relation(fields: [serviceId], references: [id])
+}
