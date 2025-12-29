@@ -177,12 +177,12 @@ serviceController.show = async (req, res) => {
         
         if (!service) return res.redirect('/dashboard');
 
-        // Fetch events for chart (last 24 hours)
+        // Fetch events for chart (last 1 hour)
         const events = await prisma.event.findMany({
             where: { 
                 serviceId: service.id,
                 timestamp: {
-                    gte: new Date(Date.now() - 24 * 60 * 60 * 1000)
+                    gte: new Date(Date.now() - 60 * 60 * 1000)
                 }
             },
             orderBy: { timestamp: 'asc' }
@@ -191,10 +191,10 @@ serviceController.show = async (req, res) => {
         // Calculate Stats
         const totalChecks = events.length;
         const upChecks = events.filter(e => e.statusCode >= 200 && e.statusCode < 400).length;
-        const uptime24h = totalChecks > 0 ? ((upChecks / totalChecks) * 100).toFixed(2) : 100;
+        const uptime = totalChecks > 0 ? ((upChecks / totalChecks) * 100).toFixed(2) : 100;
         
         const totalResponseTime = events.reduce((acc, curr) => acc + curr.responseTime, 0);
-        const avgResponseTime24h = totalChecks > 0 ? Math.round(totalResponseTime / totalChecks) : 0;
+        const avgResponseTime = totalChecks > 0 ? Math.round(totalResponseTime / totalChecks) : 0;
 
         // Get live status from Redis
         const liveStatus = await redisClient.get(`service:${service.id}:status`) || service.status;
@@ -212,8 +212,8 @@ serviceController.show = async (req, res) => {
                 lastCheck: lastCheck ? new Date(parseInt(lastCheck)) : null
             }, 
             stats: {
-                uptime24h,
-                avgResponseTime24h,
+                uptime,
+                avgResponseTime,
                 totalChecks
             },
             events: JSON.stringify(events), // For Chart
