@@ -4,6 +4,8 @@
 
 Un monitor de estado de servicios auto-hospedado, simple y eficiente. Construido con Node.js, HTMX y Redis.
 
+> 🔭 Si buscás algo más completo (métricas + logs + alertas), mirá **[theminidog](https://github.com/KamerrEzz/theminidog)** — la evolución de esta misma idea, escrita en Go.
+
 ## Stack Tecnológico
 
 *   **Backend:** Node.js, Express
