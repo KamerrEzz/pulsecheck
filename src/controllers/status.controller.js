@@ -12,7 +12,8 @@ statusController.publicStatus = async (req, res) => {
     const { userId } = req.params;
     try {
         const user = await prisma.user.findUnique({
-            where: { id: parseInt(userId) }
+            where: { id: parseInt(userId) },
+            select: { id: true, email: true, createdAt: true }
         });
 
         if (!user) {
@@ -31,10 +32,10 @@ statusController.publicStatus = async (req, res) => {
             return { ...service, status, responseTime, history };
         }));
 
-        res.render('status/public', { 
+        res.render('status/public', {
             layout: false,
-            user, 
-            services: enrichedServices 
+            user,
+            services: enrichedServices
         });
     } catch (error) {
         console.error(error);

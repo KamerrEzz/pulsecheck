@@ -17,7 +17,7 @@ Un monitor de estado de servicios auto-hospedado, simple y eficiente. Construido
 
 ## Funcionalidades
 
-*   **Monitoreo en Segundo Plano:** Worker dedicado (`node-cron`) que verifica los servicios periódicamente.
+*   **Monitoreo Integrado:** Cron en el mismo proceso verifica los servicios periódicamente.
 *   **Dashboard en Tiempo Real:** Actualizaciones automáticas de estado sin recarga de página (HTMX Polling).
 *   **Métricas:**
     *   Cálculo de Uptime y Tiempo de Respuesta Promedio (ventana de 1 hora).
@@ -93,7 +93,7 @@ El servidor estará disponible en `http://localhost:3000`.
 
 *   **Arquitectura Híbrida (SSR + HTMX):** En lugar de cargar megabytes de JavaScript (React/Vue) para una tarea simple, utilizamos **HTML-over-the-wire**. El servidor renderiza HTML parcial y el cliente solo intercambia el DOM necesario. Resultado: Tiempos de carga casi instantáneos y consumo de memoria mínimo en el navegador.
 *   **Estrategia "Redis-First" para Tiempo Real:** El dashboard no castiga la base de datos principal (PostgreSQL) con lecturas constantes. El estado actual y el historial inmediato (Sparklines) se sirven directamente desde la memoria (Redis), permitiendo escalar a miles de servicios monitoreados sin saturar el disco I/O.
-*   **Worker de Monitoreo Desacoplado:** El proceso de verificación (`monitor.js`) corre independientemente del servidor web HTTP. Si la interfaz web recibe mucho tráfico, el monitoreo no se ralentiza; y si el monitoreo es pesado, la interfaz no se congela.
+*   **Monitoreo en el Mismo Proceso:** La verificación (`monitor.js`) corre como cron dentro del proceso principal de Express, compartiendo el event loop con el servidor web. Esto mantiene la infraestructura simple, aunque un pico de tráfico web podría teóricamente afectar la latencia de las verificaciones.
 *   **Visualización de Datos Eficiente:** Los gráficos históricos ("sparklines") se construyen con estructuras de datos de lista en Redis (`RPUSH`/`LRANGE`), optimizadas para escrituras frecuentes y lecturas de rangos temporales, evitando consultas SQL complejas para datos efímeros.
 
 ### 💡 ¿Por qué Handlebars y no Next.js/React?
