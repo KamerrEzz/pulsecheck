@@ -20,7 +20,7 @@ const checkService = async (service) => {
         status = 'DOWN';
         statusCode = error.response ? error.response.status : 0;
         errorMessage = error.message;
-        
+
         // Debounce: Retry once immediately
         console.log(`Service ${service.name} failed first check. Retrying...`);
         try {
@@ -39,7 +39,7 @@ const checkService = async (service) => {
 
     // Update Redis
     // Set TTL slightly longer than check interval to ensure data availability
-    const ttl = service.checkInterval * 2; 
+    const ttl = service.checkInterval * 2;
     await redisClient.set(`service:${service.id}:status`, status, { EX: ttl });
     await redisClient.set(`service:${service.id}:responseTime`, responseTime, { EX: ttl });
     await redisClient.set(`service:${service.id}:lastCheck`, Date.now(), { EX: ttl });
@@ -73,17 +73,17 @@ const startMonitoring = () => {
     cron.schedule('*/10 * * * * *', async () => {
         try {
             const services = await prisma.service.findMany();
-            
-            services.forEach(async (service) => {
+
+            await Promise.all(services.map(async (service) => {
                 // Check if it's time to check this service
                 const lastCheckKey = `service:${service.id}:lastCheck`;
                 const lastCheck = await redisClient.get(lastCheckKey);
-                
+
                 if (!lastCheck || (Date.now() - parseInt(lastCheck)) >= service.checkInterval * 1000) {
                     await redisClient.set(lastCheckKey, Date.now().toString());
-                    checkService(service);
+                    await checkService(service);
                 }
-            });
+            }));
         } catch (error) {
             console.error('Error in monitoring loop:', error);
         }

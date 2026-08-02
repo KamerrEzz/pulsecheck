@@ -80,7 +80,17 @@ app.set('view engine', '.hbs');
 
 // Middlewares
 app.use(helmet({
-    contentSecurityPolicy: false // Disable for simplicity in dev, configure properly in prod
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: ["'self'", "https://unpkg.com", "https://cdn.jsdelivr.net"],
+            styleSrc: ["'self'", "https://unpkg.com", "https://cdn.jsdelivr.net", "'unsafe-inline'"],
+            imgSrc: ["'self'", "data:"],
+            connectSrc: ["'self'"],
+            frameSrc: ["'none'"],
+            objectSrc: ["'none'"],
+        }
+    }
 }));
 app.use(morgan('dev'));
 app.use(express.urlencoded({ extended: false }));
@@ -88,9 +98,14 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Session
+if (!process.env.SESSION_SECRET) {
+    console.error('FATAL: SESSION_SECRET environment variable is not set');
+    process.exit(1);
+}
+
 app.use(session({
     store: new RedisStore({ client: redisClient }),
-    secret: process.env.SESSION_SECRET || 'secret',
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     cookie: {
