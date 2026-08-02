@@ -41,6 +41,12 @@ Un monitor de estado de servicios auto-hospedado, simple y eficiente. Construido
     pnpm install
     ```
 
+    > ⚠️ Tras una instalación fresca, genera el cliente Prisma antes de arrancar:
+    > ```bash
+    > npx prisma generate
+    > ```
+    > Sin este paso el arranque falla con `Cannot find module .prisma/client/default`.
+
 2.  **Levantar servicios de infraestructura:**
     ```bash
     docker-compose up -d
@@ -75,6 +81,15 @@ pnpm run dev
 ```
 
 El servidor estará disponible en `http://localhost:3000`.
+
+## Docker
+
+*   **Imagen de la aplicación:** el `Dockerfile` compila una imagen lista para producción (pnpm + cliente Prisma generado durante el build, por lo que no se necesita `prisma generate` en runtime).
+    ```bash
+    docker build -t pulsecheck .
+    ```
+    En runtime la imagen espera `DATABASE_URL`, `REDIS_URL` y `SESSION_SECRET`.
+*   **Infraestructura local (PostgreSQL + Redis):** `docker-compose.yml` levanta solo las bases de datos (ver paso 2 de Configuración Local).
 
 ## Estructura del Proyecto
 
