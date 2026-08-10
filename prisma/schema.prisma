@@ -14,6 +14,7 @@ model User {
   password  String
   createdAt DateTime @default(now())
   services  Service[]
+  analyses  Analysis[]
 }
 
 model Service {
@@ -25,6 +26,7 @@ model Service {
   userId        Int
   user          User     @relation(fields: [userId], references: [id])
   events        Event[]
+  analyses      Analysis[]
 }
 
 model Event {
@@ -35,4 +37,28 @@ model Event {
   timestamp    DateTime @default(now())
   serviceId    Int
   service      Service  @relation(fields: [serviceId], references: [id])
+}
+
+model Analysis {
+  id               Int      @id @default(autoincrement())
+  serviceId        Int
+  service          Service  @relation(fields: [serviceId], references: [id])
+  userId           Int
+  user             User     @relation(fields: [userId], references: [id])
+  provider         String   // "openai", "anthropic", "google"
+  model            String   // e.g. "gpt-5-nano", "claude-haiku-4-5", "gemini-2.5-flash"
+  inputTokens      Int
+  outputTokens     Int
+  latencyMs        Int
+  narrative        String
+  severity         String   // "info", "warning", "critical" — calculated deterministically
+  category         String   // "latency", "availability", "degradation", "pattern"
+  recommendation   String
+  eventWindowStart DateTime
+  eventWindowEnd   DateTime
+  createdAt        DateTime @default(now())
+
+  @@index([serviceId])
+  @@index([userId, createdAt])
+  @@index([createdAt])
 }
