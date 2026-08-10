@@ -25,12 +25,13 @@ Un monitor de estado de servicios auto-hospedado, simple y eficiente. Construido
     *   Logs de eventos recientes.
 *   **Gestión de Servicios:** CRUD completo, borrado suave, chequeo manual inmediato ("Check Now").
 *   **Autenticación:** Sistema de usuarios seguro con Passport.js.
+*   **Análisis con IA (opcional):** narrativa técnica del estado del servicio generada por LLM, con severidad calculada de forma determinística en JS (ver [AI Analysis](#ai-analysis)).
 
 ## Configuración Local
 
 ### Prerrequisitos
 
-*   Node.js (v18+)
+*   Node.js (v22+, requerido por el Vercel AI SDK usado en la feature de análisis con IA)
 *   pnpm
 *   Docker & Docker Compose
 
@@ -60,6 +61,15 @@ Un monitor de estado de servicios auto-hospedado, simple y eficiente. Construido
     DATABASE_URL="postgresql://user:password@localhost:5432/pulsecheck?schema=public"
     REDIS_URL="redis://localhost:6379"
     SESSION_SECRET="tu_secreto_super_seguro"
+
+    # Opcional — habilita el botón "Analyze with AI" en el detalle de servicio
+    AI_PROVIDER="openai"              # "openai" | "anthropic" | "google"
+    AI_API_KEY="sk-..."
+    AI_MODEL="gpt-5-nano"             # opcional, usa el default más barato del provider
+    AI_MAX_TOKENS=1024
+    AI_TIMEOUT_MS=15000
+    AI_GLOBAL_ANALYSIS_LIMIT=500      # techo global de análisis/mes
+    AI_USER_ANALYSIS_LIMIT=50         # límite por usuario/día
     ```
 
 4.  **Inicializar base de datos:**
@@ -91,11 +101,26 @@ El servidor estará disponible en `http://localhost:3000`.
     En runtime la imagen espera `DATABASE_URL`, `REDIS_URL` y `SESSION_SECRET`.
 *   **Infraestructura local (PostgreSQL + Redis):** `docker-compose.yml` levanta solo las bases de datos (ver paso 2 de Configuración Local).
 
+## AI Analysis
+
+Desde el detalle de un servicio (`/services/:id`), el botón **"Analyze with AI"** dispara un análisis con LLM sobre los eventos de monitoreo recientes. Solo aparece si `AI_API_KEY` está configurada.
+
+*   **Streaming:** la narrativa se transmite al navegador vía Server-Sent Events y aparece palabra a palabra. Los campos estructurados (severidad, categoría, recomendación) se entregan recién al finalizar el stream.
+*   **Severidad determinística:** se calcula en JS (`src/services/ai/severity.js`) a partir de métricas — el modelo nunca decide la severidad, solo la recibe como contexto.
+*   **Provider intercambiable:** usa el [Vercel AI SDK](https://sdk.vercel.ai) (`ai` + `@ai-sdk/openai` / `@ai-sdk/anthropic` / `@ai-sdk/google`); cambiar de proveedor es solo cambiar `AI_PROVIDER` y `AI_API_KEY`.
+*   **Sanitización de prompt:** `service.name` y `service.url` se escapan y delimitan explícitamente (`src/services/ai/sanitize.js`) antes de entrar al prompt, para mitigar prompt injection.
+*   **Límites de presupuesto:** techo global mensual (`AI_GLOBAL_ANALYSIS_LIMIT`) y por usuario diario (`AI_USER_ANALYSIS_LIMIT`), verificados contra la tabla `Analysis` antes de llamar al modelo.
+*   **Persistencia:** cada análisis se guarda en la tabla `Analysis` (narrativa, métricas de tokens/latencia, proveedor/modelo, ventana de eventos analizada).
+*   **Suite de evaluación:** `tests/ai/evaluation.test.js` corre 14 casos (8 normales + 4 adversariales) contra la API real con un juez LLM que verifica fidelidad de la narrativa a los datos de entrada. Se salta automáticamente si no hay `AI_API_KEY`; en CI corre en un job aparte (`eval-ai`) solo en PRs con la label `ai-eval`.
+
+> Nota técnica: `ai` y `@ai-sdk/*` se distribuyen solo como ESM. Node 22.12+ soporta `require()` de grafos ESM síncronos de forma nativa, así que el resto del proyecto sigue en CommonJS sin cambios — ver `src/services/ai/provider.js`.
+
 ## Estructura del Proyecto
 
 *   `src/app.js`: Punto de entrada y configuración de Express.
 *   `src/services/monitor.js`: Lógica del worker de monitoreo en segundo plano.
-*   `src/controllers/`: Lógica de negocio (Servicios, Auth, Dashboard).
+*   `src/services/ai/`: Análisis con IA — provider factory, sanitización, severidad, orquestador.
+*   `src/controllers/`: Lógica de negocio (Servicios, Auth, Dashboard, Análisis IA).
 *   `src/views/`: Plantillas Handlebars y componentes parciales.
 *   `prisma/`: Esquema de base de datos y scripts de seed.
 
