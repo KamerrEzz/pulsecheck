@@ -31,3 +31,33 @@ jobs:
 
       - name: Run tests
         run: pnpm test
+
+  eval-ai:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'ai-eval')
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.26.1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/pulsecheck
+
+      - name: Run AI evaluation suite
+        run: pnpm test -- --testPathPattern=tests/ai/
+        env:
+          AI_PROVIDER: openai
+          AI_API_KEY: ${{ secrets.AI_API_KEY }}
+          AI_MODEL: gpt-5-nano
