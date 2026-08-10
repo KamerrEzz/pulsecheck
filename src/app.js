@@ -14,6 +14,7 @@ const authRoutes = require('./routes/auth.routes');
 const indexRoutes = require('./routes/index.routes');
 const serviceRoutes = require('./routes/service.routes');
 const statusRoutes = require('./routes/status.routes');
+const analysisRoutes = require('./routes/analysis.routes');
 
 // Config
 require('./config/passport');
@@ -103,6 +104,24 @@ if (!process.env.SESSION_SECRET) {
     process.exit(1);
 }
 
+// AI Analysis is optional — only validate its config when AI_API_KEY is set.
+// Without it, the feature stays disabled (the "Analyze with AI" button is
+// hidden server-side) rather than failing startup.
+if (process.env.AI_API_KEY) {
+    const { AVAILABLE_MODELS } = require('./services/ai/provider');
+    const provider = process.env.AI_PROVIDER || 'openai';
+
+    if (!AVAILABLE_MODELS[provider]) {
+        console.error(`FATAL: AI_PROVIDER "${provider}" is not supported. Use one of: ${Object.keys(AVAILABLE_MODELS).join(', ')}`);
+        process.exit(1);
+    }
+
+    if (process.env.AI_MODEL && !AVAILABLE_MODELS[provider].includes(process.env.AI_MODEL)) {
+        console.error(`FATAL: AI_MODEL "${process.env.AI_MODEL}" is not available for provider "${provider}". Use one of: ${AVAILABLE_MODELS[provider].join(', ')}`);
+        process.exit(1);
+    }
+}
+
 app.use(session({
     store: new RedisStore({ client: redisClient }),
     secret: process.env.SESSION_SECRET,
@@ -129,6 +148,7 @@ app.use((req, res, next) => {
 app.use('/', indexRoutes);
 app.use('/auth', authRoutes);
 app.use('/services', serviceRoutes);
+app.use('/services', analysisRoutes);
 app.use('/status', statusRoutes);
 
 // Start Server

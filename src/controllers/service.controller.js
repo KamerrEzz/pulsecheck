@@ -242,7 +242,8 @@ serviceController.show = async (req, res) => {
                 totalChecks
             },
             events: events, // For Chart
-            logs // For Table
+            logs, // For Table
+            aiEnabled: Boolean(process.env.AI_API_KEY)
         });
     } catch (error) {
         console.error(error);
